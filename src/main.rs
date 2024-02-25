@@ -5,17 +5,19 @@ use piston_window::*;
 mod player;
 mod utils;
 
+const WIDTH: f64 = 640.0;
+const HEIGHT: f64 = 480.0;
+
+const OFFSET: f64 = 20.0;
+const PADDDLE_COLOR: [f32; 4] = [1.0, 0.0, 0.0, 1.0];
+
 fn main() {
 
-    let mut paddle = player::Paddle{
-        position_lower_left: utils::Location{x: 0.0, y: 0.0},
-        position_upper_right: utils::Location{x: 50.0, y: 10.0},
-        move_direction: utils::Direction::Stationary
-    };
+    let mut paddle = player::Paddle::new(WIDTH, HEIGHT, OFFSET);
 
     let mut window: PistonWindow =
-        WindowSettings::new("Basic Game!", [640, 480])
-        .exit_on_esc(true).build().unwrap();
+        WindowSettings::new("Basic Game!", [WIDTH, HEIGHT])
+        .exit_on_esc(true).resizable(false).build().unwrap();
     
     // let event_settings = EventSettings::new().ups(15);
     // let mut events = Events::new(event_settings);
@@ -24,19 +26,19 @@ fn main() {
         window.draw_2d(&event, |context, graphics, _device| {
             clear([0.0; 4], graphics);
             paddle.step();
-            rectangle([1.0, 0.0, 0.0, 1.0], // red
-                      [paddle.position_lower_left.x, paddle.position_lower_left.y, paddle.position_upper_right.x, paddle.position_upper_right.y],
+            // println!("{:?}", paddle);
+            rectangle(PADDDLE_COLOR,
+                      paddle.get_dims(),
                       context.transform,
                       graphics);
         });
+
         if let Some(args) = event.button_args() {
             if args.state == ButtonState::Press {
                 if args.button == Button::Keyboard(Key::Left) {
-                    println!("{:?}", paddle);
                     paddle.move_horizontal(utils::Direction::Left); 
                 }
                 if args.button == Button::Keyboard(Key::Right) {
-                    println!("{:?}", paddle);
                     paddle.move_horizontal(utils::Direction::Right); 
                 }
             }
