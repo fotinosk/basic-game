@@ -3,6 +3,7 @@ extern crate piston_window;
 use piston_window::*;
 
 mod player;
+mod ball;
 mod utils;
 
 const WIDTH: f64 = 640.0;
@@ -21,6 +22,9 @@ fn main() {
     
     // let event_settings = EventSettings::new().ups(15);
     // let mut events = Events::new(event_settings);
+    
+    let mut started = false;
+    // TODO: how to implement the ball rendering
 
     while let Some(event) = window.next() {
         window.draw_2d(&event, |context, graphics, _device| {
@@ -35,11 +39,14 @@ fn main() {
 
         if let Some(args) = event.button_args() {
             if args.state == ButtonState::Press {
-                if args.button == Button::Keyboard(Key::Left) {
+                if args.button == Button::Keyboard(Key::Left) && started {
                     paddle.move_horizontal(utils::Direction::Left); 
                 }
-                if args.button == Button::Keyboard(Key::Right) {
+                if args.button == Button::Keyboard(Key::Right) && started {
                     paddle.move_horizontal(utils::Direction::Right); 
+                }
+                if args.button == Button::Keyboard(Key::Space) {
+                    started = true;
                 }
             }
             if args.state == ButtonState::Release {

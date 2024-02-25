@@ -1,5 +1,3 @@
-use std::array;
-
 use crate::utils;
 
 const SPEED: f64 = 4.0;
@@ -33,12 +31,12 @@ impl Paddle {
     pub fn step(&mut self) {
         match self.move_direction {
             utils::Direction::Left => {
-                // self.position_upper_right.x -= SPEED;
                 self.position_lower_left.x -= SPEED;
+                self.position_lower_left.x = self.position_lower_left.x.max(0.0);
             }
             utils::Direction::Right => {
-                // self.position_upper_right.x += SPEED;
                 self.position_lower_left.x += SPEED;
+                self.position_lower_left.x = (self.position_lower_left.x).min(crate::WIDTH - PADDLE_LEN);
             }
             utils::Direction::Stationary => {}
         }
