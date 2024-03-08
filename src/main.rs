@@ -15,6 +15,7 @@ const PADDDLE_COLOR: [f32; 4] = [1.0, 0.0, 0.0, 1.0];
 fn main() {
 
     let mut paddle = player::Paddle::new(WIDTH, HEIGHT, OFFSET);
+    let mut ball = ball::Ball::new(WIDTH, HEIGHT, OFFSET);
 
     let mut window: PistonWindow =
         WindowSettings::new("Basic Game!", [WIDTH, HEIGHT])
@@ -35,6 +36,8 @@ fn main() {
                       paddle.get_dims(),
                       context.transform,
                       graphics);
+
+            ellipse(PADDDLE_COLOR, ball.get_dims(), context.transform, graphics);
         });
 
         if let Some(args) = event.button_args() {

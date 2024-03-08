@@ -11,9 +11,12 @@ impl Ball {
         // initialize the ball at the middle of the paddle with a random velocity vector
         let mut rng = rand::thread_rng();
         let b = Ball {
-            position: utils::Location{x: screen_width / 2.0, y: screen_height - paddle_height},
+            position: utils::Location{x: screen_width / 2.0, y: screen_height - 2.5 * paddle_height},
             direction: utils::Location{ x: rng.gen_range(-4.0..4.0), y: rng.gen_range(0.1..2.0) }
         };
         b
+    }
+    pub fn get_dims(&self) -> [f64;4] {
+        [self.position.x, self.position.y, 20.0, 20.0]
     }
 }
