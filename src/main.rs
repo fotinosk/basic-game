@@ -12,6 +12,8 @@ const HEIGHT: f64 = 480.0;
 const OFFSET: f64 = 20.0;
 const PADDDLE_COLOR: [f32; 4] = [1.0, 0.0, 0.0, 1.0];
 
+const DT: f64 = 1.0;
+
 fn main() {
 
     let mut paddle = player::Paddle::new(WIDTH, HEIGHT, OFFSET);
@@ -25,13 +27,14 @@ fn main() {
     // let mut events = Events::new(event_settings);
     
     let mut started = false;
-    // TODO: how to implement the ball rendering
 
     while let Some(event) = window.next() {
         window.draw_2d(&event, |context, graphics, _device| {
             clear([0.0; 4], graphics);
-            paddle.step();
-            // println!("{:?}", paddle);
+            if started {
+                paddle.step();
+                ball.step();
+            }
             rectangle(PADDDLE_COLOR,
                       paddle.get_dims(),
                       context.transform,
