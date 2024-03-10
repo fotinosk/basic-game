@@ -33,12 +33,9 @@ fn main() {
             clear([0.0; 4], graphics);
             if started {
                 paddle.step();
-                ball.step();
+                ball.step(&paddle);
             }
-            rectangle(PADDDLE_COLOR,
-                      paddle.get_dims(),
-                      context.transform,
-                      graphics);
+            rectangle(PADDDLE_COLOR, paddle.get_dims(), context.transform, graphics);
 
             ellipse(PADDDLE_COLOR, ball.get_dims(), context.transform, graphics);
         });

@@ -8,8 +8,8 @@ const PADDLE_HEIGHT: f64 = 10.0;
 pub struct Paddle {
     pub position_lower_left: utils::Location,
     pub move_direction: utils::Direction,
-    width: f64,
-    height: f64
+    pub width: f64,
+    pub height: f64
 
 }
 
