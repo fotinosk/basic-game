@@ -1,83 +1,88 @@
 use crate::{player::Paddle, utils, HEIGHT, WIDTH};
-use rand::Rng;
+
+const BALLRADIUS: f64 = 20.0;
 
 #[derive(Debug)]
-enum BOUNCE_OBJ {
-    LEFT_WALL,
-    RIGHT_WALL, 
-    TOP_WALL,
-    BOTTOM_WALL,
-    PADDLE, 
-    NONE
+enum BounceObj {
+    LeftWall,
+    RightWall, 
+    TopWall,
+    BottomWall,
+    Paddle, 
+    NoBounce 
 }
 
 pub struct Ball {
     pub position: utils::Location,
-    pub direction: utils::Location  // vector specifing the velocity
+    pub direction: utils::Location, 
+    radius: f64
 }
 
 impl Ball {
     pub fn new(screen_width: f64 , screen_height: f64, paddle_height: f64) -> Ball {
-        // initialize the ball at the middle of the paddle with a random velocity vector
-        let mut rng = rand::thread_rng();
         let b = Ball {
             position: utils::Location{x: screen_width / 2.0, y: screen_height - 2.5 * paddle_height},
-            direction: utils::Location{ x: rng.gen_range(-1.0..1.0), y: rng.gen_range(-2.0..-0.1) }
+            direction: utils::Location{ x: 2.0, y: -2.0 },
+            radius: BALLRADIUS
         };
         b
     }
     pub fn get_dims(&self) -> [f64;4] {
-        [self.position.x, self.position.y, 20.0, 20.0]
+        [self.position.x, self.position.y, self.radius, self.radius]
     }
-    pub fn step(&mut self, paddle: &Paddle) {
+    pub fn step(&mut self, paddle: &Paddle) -> bool {
         self.position.x = self.position.x + self.direction.x * crate::DT;
         self.position.y = self.position.y + self.direction.y * crate::DT;
 
         let bounce = self.check_bounce(&paddle);
 
         match bounce {
-            BOUNCE_OBJ::NONE => {},
-            BOUNCE_OBJ::PADDLE => {
+            BounceObj::NoBounce => { true },
+            BounceObj::Paddle => {
                 // the y coord need to be negative
                 println!("Paddle bounce");
                 self.direction.y = self.direction.y.abs() * -1.0; 
+                true
             }
-            BOUNCE_OBJ::TOP_WALL => {
+            BounceObj::TopWall => {
                 self.direction.y = self.direction.y.abs(); 
+                true
             } 
-            BOUNCE_OBJ::LEFT_WALL => {
+            BounceObj::LeftWall => {
                 self.direction.x = self.direction.x.abs(); 
+                true
             } 
-            BOUNCE_OBJ::RIGHT_WALL => {
+            BounceObj::RightWall => {
                 self.direction.x = self.direction.x.abs() * -1.0; 
+                true
             }
-            BOUNCE_OBJ::BOTTOM_WALL => {
-                println!("Ball is out of bounds, game over")
+            BounceObj::BottomWall => {
+                println!("Ball is out of bounds, game over");
+                false
             }
 
         }
     }
-    fn check_bounce(&mut self, paddle: &Paddle) -> BOUNCE_OBJ  {
+    fn check_bounce(&mut self, paddle: &Paddle) -> BounceObj  {
         if self.position.y < 0.0 {
-            BOUNCE_OBJ::TOP_WALL
+            BounceObj::TopWall
         }
         else if self.position.y > HEIGHT {
-            BOUNCE_OBJ::BOTTOM_WALL 
+            BounceObj::BottomWall 
         }
         else if self.position.x < 0.0 {
-            BOUNCE_OBJ::LEFT_WALL
+            BounceObj::LeftWall
         }
-        else if self.position.x > WIDTH {
-            BOUNCE_OBJ::RIGHT_WALL
+        else if self.position.x > WIDTH - self.radius {
+            BounceObj::RightWall
         }
-        // TODO: implement paddle collision detection
         else if self.position.y > HEIGHT - 2.5 * crate::OFFSET && 
-            paddle.position_lower_left.x < self.position.x &&
-            self.position.x < paddle.position_lower_left.x + paddle.width {
-            BOUNCE_OBJ::PADDLE
+        paddle.position_lower_left.x < self.position.x &&
+        self.position.x < paddle.position_lower_left.x + paddle.width {
+                BounceObj::Paddle
         }
         else {
-            BOUNCE_OBJ::NONE
+            BounceObj::NoBounce
         }
     }
 }
