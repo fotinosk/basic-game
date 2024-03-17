@@ -15,6 +15,7 @@ enum BounceObj {
 pub struct Ball {
     pub position: utils::Location,
     pub direction: utils::Location, 
+    pub charge: f64,
     radius: f64
 }
 
@@ -23,12 +24,16 @@ impl Ball {
         let b = Ball {
             position: utils::Location{x: screen_width / 2.0, y: screen_height - 2.5 * paddle_height},
             direction: utils::Location{ x: 3.0, y: -3.0 },
+            charge: 1.0,
             radius: BALLRADIUS
         };
         b
     }
     pub fn get_dims(&self) -> [f64;4] {
         [self.position.x, self.position.y, self.radius, self.radius]
+    }
+    pub fn get_centre(&self) -> [f64;2] {
+        [self.position.x + self.radius/2.0, self.position.y + self.radius /2.0]
     }
     pub fn step(&mut self, paddle: &Paddle, acceleration: utils::Location) -> bool {
         self.direction.x += acceleration.x * crate::DT;

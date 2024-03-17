@@ -12,6 +12,7 @@ const HEIGHT: f64 = 480.0;
 
 const OFFSET: f64 = 20.0;
 const PADDDLE_COLOR: [f32; 4] = [1.0, 0.0, 0.0, 1.0];
+const MAGN_COLOR: [f32; 4] = [1.0, 1.0, 0.0, 1.0];
 
 const DT: f64 = 1.0;
 
@@ -53,6 +54,15 @@ fn main() {
             }
             rectangle(PADDDLE_COLOR, paddle.get_dims(), context.transform, graphics);
             ellipse(PADDDLE_COLOR, ball.get_dims(), context.transform, graphics);
+
+            // TODO: draw perpendicular vector to ensure it's correct
+            line::Line::new(MAGN_COLOR, 2.0).draw_from_to(
+                paddle.get_centre(), 
+                ball.get_centre(), 
+                &context.draw_state, 
+                context.transform, 
+                graphics
+            );
 
             if !inplay {
                 let _ = text(

@@ -19,4 +19,12 @@ impl Location {
     pub fn scale(&self, factor: f64) -> Location {
         Location{x : self.x * factor, y: self.y * factor}
     }
+    pub fn magnitute(&self) -> f64 {
+        let magn = (self.x * self.x + self.y * self.y).sqrt();
+        magn
+    }
+    pub fn get_normal_vector(&self) -> Location {
+        let unit_vector = self.normalize();
+        Location{x : unit_vector.y, y: -1.0 * unit_vector.x}
+    }
 }

@@ -45,4 +45,7 @@ impl Paddle {
     pub fn get_dims(&self) -> [f64; 4] {
         [self.position_lower_left.x, self.position_lower_left.y, self.width, self.height]
     }
+    pub fn get_centre(&self) -> [f64;2] {
+        [self.position_lower_left.x + PADDLE_LEN / 2.0, self.position_lower_left.y]
+    }
 }
