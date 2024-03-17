@@ -11,10 +11,12 @@ pub enum Direction {
     Stationary
 }
 
-#[derive(Debug)]
-pub struct Velocity {
-    // x and y are unit vectors
-    pub x: f64,
-    pub y: f64, 
-    pub magn: f64
+impl Location {
+    pub fn normalize(&self) ->  Location {
+        let magn = (self.x * self.x + self.y * self.y).sqrt();
+        Location{x : self.x / magn, y: self.y /magn}
+    }
+    pub fn scale(&self, factor: f64) -> Location {
+        Location{x : self.x * factor, y: self.y * factor}
+    }
 }

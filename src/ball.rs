@@ -22,7 +22,7 @@ impl Ball {
     pub fn new(screen_width: f64 , screen_height: f64, paddle_height: f64) -> Ball {
         let b = Ball {
             position: utils::Location{x: screen_width / 2.0, y: screen_height - 2.5 * paddle_height},
-            direction: utils::Location{ x: 2.0, y: -2.0 },
+            direction: utils::Location{ x: 3.0, y: -3.0 },
             radius: BALLRADIUS
         };
         b
@@ -30,7 +30,10 @@ impl Ball {
     pub fn get_dims(&self) -> [f64;4] {
         [self.position.x, self.position.y, self.radius, self.radius]
     }
-    pub fn step(&mut self, paddle: &Paddle) -> bool {
+    pub fn step(&mut self, paddle: &Paddle, acceleration: utils::Location) -> bool {
+        self.direction.x += acceleration.x * crate::DT;
+        self.direction.y += acceleration.y * crate::DT;
+
         self.position.x = self.position.x + self.direction.x * crate::DT;
         self.position.y = self.position.y + self.direction.y * crate::DT;
 

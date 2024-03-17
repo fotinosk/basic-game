@@ -41,16 +41,15 @@ fn main() {
         font,
         window.create_texture_context(),
         TextureSettings::new(),
-    )
-    .unwrap();
+    ).unwrap();
 
-    // while let Some(event) = window.next() {
     while let Some(event) = events.next(&mut window) {
         window.draw_2d(&event, |context, graphics, device| {
             clear([0.0; 4], graphics);
             if started {
+                let grav_accel = gravity.excert_force(&ball);
                 paddle.step();
-                inplay = ball.step(&paddle);
+                inplay = ball.step(&paddle, grav_accel);
             }
             rectangle(PADDDLE_COLOR, paddle.get_dims(), context.transform, graphics);
             ellipse(PADDDLE_COLOR, ball.get_dims(), context.transform, graphics);
