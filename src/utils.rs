@@ -1,4 +1,4 @@
-use crate::{HEIGHT, WIDTH};
+use crate::constants;
 
 #[derive(Debug)]
 pub struct Location {
@@ -35,7 +35,7 @@ pub fn color_by_distance(body1: &[f64; 2], body2: &[f64; 2]) -> [f32; 4] {
     // if the distance is zero then the color is red
     // the further they get the more green it gets
     
-    let max_distance = (WIDTH * WIDTH + HEIGHT * HEIGHT).sqrt();
+    let max_distance = (constants::WIDTH * constants::WIDTH + constants::HEIGHT * constants::HEIGHT).sqrt();
     let dist_vector = Location{x : body1[0] - body2[0] , y: body1[1] - body2[1]};
     let distance = dist_vector.magnitute();
 

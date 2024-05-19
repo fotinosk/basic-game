@@ -1,39 +1,47 @@
 extern crate piston_window;
-
+use graphics::{Graphics};
 use piston_window::*;
+use force_fields::Force;
 
+
+mod constants;
 mod player;
 mod ball;
 mod utils;
 mod force_fields;
 
-const WIDTH: f64 = 640.0;
-const HEIGHT: f64 = 480.0;
-
-const OFFSET: f64 = 20.0;
-const PADDDLE_COLOR: [f32; 4] = [1.0, 0.0, 0.0, 1.0];
-const MAGN_COLOR: [f32; 4] = [0.0, 1.0, 0.0, 1.0];
-
-const DT: f64 = 1.0;
+fn draw_forces<G: Graphics>(forces: &[Box<dyn Force>], ball: &ball::Ball, draw_state: &DrawState, trnsf: [[f64;3]; 2], graphics: &mut G) {
+    for force in forces {
+        line::Line::new(utils::color_by_distance(&ball.get_centre(), &force.get_center()), 2.0).draw_from_to(
+            ball.get_centre(),
+            force.get_center(),
+            draw_state, trnsf, graphics
+        )
+    }
+}
 
 fn main() {
     let mut started = false;
     let mut inplay = true;
 
-    let mut paddle = player::Paddle::new(WIDTH, HEIGHT, OFFSET);
-    let mut ball = ball::Ball::new(WIDTH, HEIGHT, OFFSET);
-    let gravity = force_fields::Gravity::new();
-    let e_field = force_fields::ElectricField::new(WIDTH / 2.0, HEIGHT / 2.0);
+    let mut paddle = player::Paddle::new(constants::WIDTH, constants::HEIGHT, constants::OFFSET);
+    let mut ball = ball::Ball::new(constants::WIDTH, constants::HEIGHT, constants::OFFSET);
+
+    // initialize forces here
+    let forces: Vec<Box<dyn Force>> = vec![
+        Box::new(force_fields::Gravity::new()),
+        Box::new(force_fields::ElectricField::new(constants::WIDTH / 2.0, constants::HEIGHT / 2.0)),
+    ];
 
     let mut window: PistonWindow =
-        WindowSettings::new("Basic Game!", [WIDTH, HEIGHT])
+        WindowSettings::new("Basic Game!", [constants::WIDTH, constants::HEIGHT])
         .exit_on_esc(true).resizable(false).build().unwrap();
     
     let mut events = Events::new(
         (||{
             let mut settings = EventSettings::new();
-            settings.ups = 160;
-            settings.max_fps = 160;
+            settings.ups = 360;
+            settings.max_fps = 360;
             settings
         })()
     );    
@@ -49,62 +57,38 @@ fn main() {
         window.draw_2d(&event, |context, graphics, device| {
             clear([0.0; 4], graphics);
             if started {
-                let grav_accel = gravity.excert_force(&ball);
-                let elec_accel = e_field.excert_force(&ball);
-                let accel = utils::Location{ x: grav_accel.x + elec_accel.x, y: grav_accel.y + elec_accel.y}; 
+                draw_forces(&forces, &ball, &context.draw_state, context.transform, graphics);
+                let accel = force_fields::sum_forces(&forces, &ball);
                 paddle.step();
                 inplay = ball.step(&paddle, accel);
 
-                // draw line to show gravitational force
-                line::Line::new(utils::color_by_distance(&ball.get_centre(), &e_field.get_center()), 2.0).draw_from_to(
-                    ball.get_centre(),
-                    e_field.get_center(),
-                    &context.draw_state,
-                    context.transform,
-                    graphics
-                )
             }
-            rectangle(PADDDLE_COLOR, paddle.get_dims(), context.transform, graphics);
-            ellipse(PADDDLE_COLOR, ball.get_dims(), context.transform, graphics);
-
-            // TODO: draw perpendicular vector to ensure it's correct
-            line::Line::new(
-                utils::color_by_distance(
-                    &paddle.get_centre(), &ball.get_centre()
-                ), 2.0).draw_from_to(
-                    paddle.get_centre(), 
-                    ball.get_centre(), 
-                    &context.draw_state, 
-                    context.transform, 
-                    graphics
-                );
+            rectangle(constants::PADDDLE_COLOR, paddle.get_dims(), context.transform, graphics);
+            ellipse(constants::PADDDLE_COLOR, ball.get_dims(), context.transform, graphics);
+            ellipse(constants::PADDDLE_COLOR, [constants::WIDTH / 2.0, constants::HEIGHT / 2.0, 5.0, 5.0], context.transform, graphics);
 
             if !inplay {
                 let _ = text(
-                    PADDDLE_COLOR, 
+                    constants::PADDDLE_COLOR, 
                     28, 
                     "GAME OVER", 
                     &mut glyphs, 
-                    context.transform.trans(HEIGHT/2.0, WIDTH/2.0 - 100.0), 
+                    context.transform.trans(constants::HEIGHT/2.0, constants::WIDTH/2.0 - 100.0), 
                     graphics
                 );
                 let _ = text(
-                    PADDDLE_COLOR, 
+                    constants::PADDDLE_COLOR, 
                     20, 
                     " Press Q to exit",  // a very elegant solution to centering text 
                     &mut glyphs, 
-                    context.transform.trans(HEIGHT/2.0, WIDTH/2.0 - 50.0), 
+                    context.transform.trans(constants::HEIGHT/2.0, constants::WIDTH/2.0 - 50.0), 
                     graphics
                 );
-
+                started = false;
             }
 
             glyphs.factory.encoder.flush(device);
         });
-
-        if !inplay {
-            started = false;
-        }
 
         if let Some(args) = event.button_args() {
             if args.state == ButtonState::Press {
@@ -115,10 +99,9 @@ fn main() {
                     paddle.move_horizontal(utils::Direction::Right); 
                 }
                 if args.button == Button::Keyboard(Key::Space) {
-                    started = true;
+                    started = !started;
                 }
                 if args.button == Button::Keyboard(Key::Q) {
-                    // started = false;
                     break;
                 }
             }
@@ -126,6 +109,5 @@ fn main() {
                 paddle.move_horizontal(utils::Direction::Stationary);
             }
         }
-            
     }
 }

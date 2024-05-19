@@ -1,6 +1,4 @@
-use crate::{player::Paddle, utils, HEIGHT, WIDTH};
-
-const BALLRADIUS: f64 = 20.0;
+use crate::{player::Paddle, utils, constants};
 
 #[derive(Debug)]
 enum BounceObj {
@@ -25,7 +23,7 @@ impl Ball {
             position: utils::Location{x: screen_width / 2.0, y: screen_height - 2.5 * paddle_height},
             direction: utils::Location{ x: 3.0, y: -3.0 },
             charge: 1.0,
-            radius: BALLRADIUS
+            radius: constants::BALLRADIUS
         };
         b
     }
@@ -36,11 +34,11 @@ impl Ball {
         [self.position.x + self.radius/2.0, self.position.y + self.radius /2.0]
     }
     pub fn step(&mut self, paddle: &Paddle, acceleration: utils::Location) -> bool {
-        self.direction.x += acceleration.x * crate::DT;
-        self.direction.y += acceleration.y * crate::DT;
+        self.direction.x += acceleration.x * constants::DT;
+        self.direction.y += acceleration.y * constants::DT;
 
-        self.position.x = self.position.x + self.direction.x * crate::DT;
-        self.position.y = self.position.y + self.direction.y * crate::DT;
+        self.position.x = self.position.x + self.direction.x * constants::DT;
+        self.position.y = self.position.y + self.direction.y * constants::DT;
 
         let bounce = self.check_bounce(&paddle);
 
@@ -48,7 +46,6 @@ impl Ball {
             BounceObj::NoBounce => { true },
             BounceObj::Paddle => {
                 // the y coord need to be negative
-                println!("Paddle bounce");
                 self.direction.y = self.direction.y.abs() * -1.0; 
                 true
             }
@@ -75,16 +72,16 @@ impl Ball {
         if self.position.y < 0.0 {
             BounceObj::TopWall
         }
-        else if self.position.y > HEIGHT {
+        else if self.position.y > constants::HEIGHT {
             BounceObj::BottomWall 
         }
         else if self.position.x < 0.0 {
             BounceObj::LeftWall
         }
-        else if self.position.x > WIDTH - self.radius {
+        else if self.position.x > constants::WIDTH - self.radius {
             BounceObj::RightWall
         }
-        else if self.position.y > HEIGHT - 2.5 * crate::OFFSET && 
+        else if self.position.y > constants::HEIGHT - 2.5 * constants::OFFSET && 
         paddle.position_lower_left.x < self.position.x &&
         self.position.x < paddle.position_lower_left.x + paddle.width {
                 BounceObj::Paddle
