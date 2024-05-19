@@ -3,7 +3,8 @@ use graphics::{Graphics};
 use piston_window::*;
 use force_fields::Force;
 
-
+mod ui;
+mod block;
 mod constants;
 mod player;
 mod ball;
@@ -61,10 +62,9 @@ fn main() {
                 let accel = force_fields::sum_forces(&forces, &ball);
                 paddle.step();
                 inplay = ball.step(&paddle, accel);
-
             }
             rectangle(constants::PADDDLE_COLOR, paddle.get_dims(), context.transform, graphics);
-            ellipse(constants::PADDDLE_COLOR, ball.get_dims(), context.transform, graphics);
+            ellipse(constants::BALL_COLOR, ball.get_dims(), context.transform, graphics);
             ellipse(constants::PADDDLE_COLOR, [constants::WIDTH / 2.0, constants::HEIGHT / 2.0, 5.0, 5.0], context.transform, graphics);
 
             if !inplay {
