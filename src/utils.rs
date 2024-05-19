@@ -1,4 +1,5 @@
-use crate::constants;
+use crate::{constants, utils, ball, force_fields::Force};
+use piston_window::*;
 
 #[derive(Debug)]
 pub struct Location {
@@ -41,4 +42,14 @@ pub fn color_by_distance(body1: &[f64; 2], body2: &[f64; 2]) -> [f32; 4] {
 
     [(1.0 - distance / max_distance) as f32, (distance / max_distance) as f32, 0.0, 1.0]
     
+}
+
+pub fn draw_forces<G: Graphics>(forces: &[Box<dyn Force>], ball: &ball::Ball, draw_state: &DrawState, trnsf: [[f64;3]; 2], graphics: &mut G) {
+    for force in forces {
+        line::Line::new(utils::color_by_distance(&ball.get_centre(), &force.get_center()), 2.0).draw_from_to(
+            ball.get_centre(),
+            force.get_center(),
+            draw_state, trnsf, graphics
+        )
+    }
 }

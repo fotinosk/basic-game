@@ -11,15 +11,7 @@ mod ball;
 mod utils;
 mod force_fields;
 
-fn draw_forces<G: Graphics>(forces: &[Box<dyn Force>], ball: &ball::Ball, draw_state: &DrawState, trnsf: [[f64;3]; 2], graphics: &mut G) {
-    for force in forces {
-        line::Line::new(utils::color_by_distance(&ball.get_centre(), &force.get_center()), 2.0).draw_from_to(
-            ball.get_centre(),
-            force.get_center(),
-            draw_state, trnsf, graphics
-        )
-    }
-}
+
 
 fn main() {
     let mut started = false;
@@ -58,11 +50,13 @@ fn main() {
         window.draw_2d(&event, |context, graphics, device| {
             clear([0.0; 4], graphics);
             if started {
-                draw_forces(&forces, &ball, &context.draw_state, context.transform, graphics);
+                utils::draw_forces(&forces, &ball, &context.draw_state, context.transform, graphics);
                 let accel = force_fields::sum_forces(&forces, &ball);
                 paddle.step();
                 inplay = ball.step(&paddle, accel);
             }
+            // TODO: move drawing to the struct itself
+            // TODO: implement block grid
             rectangle(constants::PADDDLE_COLOR, paddle.get_dims(), context.transform, graphics);
             ellipse(constants::BALL_COLOR, ball.get_dims(), context.transform, graphics);
             ellipse(constants::PADDDLE_COLOR, [constants::WIDTH / 2.0, constants::HEIGHT / 2.0, 5.0, 5.0], context.transform, graphics);
