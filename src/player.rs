@@ -1,3 +1,5 @@
+use piston_window::*;
+
 use crate::{utils, constants};
 
 #[derive(Debug)]
@@ -43,5 +45,8 @@ impl Paddle {
     }
     pub fn get_centre(&self) -> [f64;2] {
         [self.position_lower_left.x + constants::PADDLE_LEN / 2.0, self.position_lower_left.y]
+    }
+    pub fn draw<G: Graphics>(&self, g: &mut G, transform: [[f64;3]; 2]) {
+        rectangle(constants::PADDDLE_COLOR, self.get_dims(), transform, g);
     }
 }

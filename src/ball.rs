@@ -1,4 +1,5 @@
 use crate::{player::Paddle, utils, constants};
+use piston_window::*;
 
 #[derive(Debug)]
 enum BounceObj {
@@ -89,5 +90,8 @@ impl Ball {
         else {
             BounceObj::NoBounce
         }
+    }
+    pub fn draw<G: Graphics>(&self, g: &mut G, transform: [[f64;3]; 2]) {
+        ellipse(constants::BALL_COLOR, self.get_dims(), transform, g);
     }
 }

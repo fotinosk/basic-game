@@ -1,3 +1,5 @@
+use std::hash::{Hash, Hasher};
+
 use crate::{constants, utils, ball, force_fields::Force};
 use piston_window::*;
 
@@ -31,6 +33,21 @@ impl Location {
         Location{x : unit_vector.y, y: -1.0 * unit_vector.x}
     }
 }
+
+impl PartialEq for Location {
+    fn eq(&self, other: &Self) -> bool {
+        self.x == other.x && self.y == other.y
+    }
+}
+impl Eq for Location {} // only PartialEq needed
+
+impl Hash for Location {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        (self.x as u64).hash(state);
+        (self.y as u64).hash(state);
+    } 
+}
+
 
 pub fn color_by_distance(body1: &[f64; 2], body2: &[f64; 2]) -> [f32; 4] {
     // if the distance is zero then the color is red

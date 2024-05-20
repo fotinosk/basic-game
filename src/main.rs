@@ -1,5 +1,4 @@
 extern crate piston_window;
-use graphics::{Graphics};
 use piston_window::*;
 use force_fields::Force;
 
@@ -10,7 +9,6 @@ mod player;
 mod ball;
 mod utils;
 mod force_fields;
-
 
 
 fn main() {
@@ -55,10 +53,8 @@ fn main() {
                 paddle.step();
                 inplay = ball.step(&paddle, accel);
             }
-            // TODO: move drawing to the struct itself
-            // TODO: implement block grid
-            rectangle(constants::PADDDLE_COLOR, paddle.get_dims(), context.transform, graphics);
-            ellipse(constants::BALL_COLOR, ball.get_dims(), context.transform, graphics);
+            paddle.draw(graphics, context.transform);
+            ball.draw(graphics, context.transform);
             ellipse(constants::PADDDLE_COLOR, [constants::WIDTH / 2.0, constants::HEIGHT / 2.0, 5.0, 5.0], context.transform, graphics);
 
             if !inplay {
