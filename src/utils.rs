@@ -3,7 +3,7 @@ use std::hash::{Hash, Hasher};
 use crate::{constants, utils, ball, force_fields::Force};
 use piston_window::*;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Location {
     pub x: f64,
     pub y: f64
@@ -28,10 +28,10 @@ impl Location {
         let magn = (self.x * self.x + self.y * self.y).sqrt();
         magn
     }
-    pub fn get_normal_vector(&self) -> Location {
-        let unit_vector = self.normalize();
-        Location{x : unit_vector.y, y: -1.0 * unit_vector.x}
-    }
+    // pub fn get_normal_vector(&self) -> Location {
+    //     let unit_vector = self.normalize();
+    //     Location{x : unit_vector.y, y: -1.0 * unit_vector.x}
+    // }
 }
 
 impl PartialEq for Location {

@@ -15,7 +15,7 @@ impl Gravity {
     pub fn new() -> Gravity {
             let gr = Gravity{ 
                 center: utils::Location { x: constants::WIDTH / 2.0 , y: 100000.0 } ,
-                strength: -0.0005
+                strength: constants::GRAVITATIONAL_STRENGTH
             };
             gr
         }
@@ -44,7 +44,7 @@ impl ElectricField {
     pub fn new(x: f64, y: f64) -> ElectricField {
         let em = ElectricField{
             center: utils::Location { x, y },
-            q: -1000.0
+            q: constants::ELECTRIC_FIELD_STRENGTH
         };
         em
     }

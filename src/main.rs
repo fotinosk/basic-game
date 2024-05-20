@@ -2,7 +2,6 @@ extern crate piston_window;
 use piston_window::*;
 use force_fields::Force;
 
-mod ui;
 mod block;
 mod constants;
 mod player;
@@ -17,6 +16,7 @@ fn main() {
 
     let mut paddle = player::Paddle::new(constants::WIDTH, constants::HEIGHT, constants::OFFSET);
     let mut ball = ball::Ball::new(constants::WIDTH, constants::HEIGHT, constants::OFFSET);
+    let mut block_grid = block::BlockGrid::new(constants::NUM_BLOCK_ROWS, constants::NUM_BLOCK_COLS);
 
     // initialize forces here
     let forces: Vec<Box<dyn Force>> = vec![
@@ -55,6 +55,7 @@ fn main() {
             }
             paddle.draw(graphics, context.transform);
             ball.draw(graphics, context.transform);
+            block_grid.draw(graphics, context.transform);
             ellipse(constants::PADDDLE_COLOR, [constants::WIDTH / 2.0, constants::HEIGHT / 2.0, 5.0, 5.0], context.transform, graphics);
 
             if !inplay {
