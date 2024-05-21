@@ -11,9 +11,9 @@ mod force_fields;
 
 
 fn main() {
-    let mut started = false;
-    let mut inplay = true;
+    let mut state = utils::GameState::NotStarted;
 
+    // initialize game objects
     let mut paddle = player::Paddle::new(constants::WIDTH, constants::HEIGHT, constants::OFFSET);
     let mut ball = ball::Ball::new();
     let mut block_grid = block::BlockGrid::new(constants::NUM_BLOCK_ROWS, constants::NUM_BLOCK_COLS);
@@ -24,6 +24,7 @@ fn main() {
         Box::new(force_fields::ElectricField::new(constants::WIDTH / 2.0, constants::HEIGHT / 2.0)),
     ];
 
+    // initialize gui
     let mut window: PistonWindow =
         WindowSettings::new("Basic Game!", [constants::WIDTH, constants::HEIGHT])
         .exit_on_esc(true).resizable(false).build().unwrap();
@@ -48,37 +49,42 @@ fn main() {
         window.draw_2d(&event, |context, graphics, device| {
             clear([0.0; 4], graphics);
 
-            if started {
-                utils::draw_forces(&forces, &ball, &context.draw_state, context.transform, graphics);
-                let accel = force_fields::sum_forces(&forces, &ball);
-                paddle.step();
-                inplay = ball.step(&paddle, accel);
-            }
-
             paddle.draw(graphics, context.transform);
             ball.draw(graphics, context.transform);
             block_grid.draw(graphics, context.transform);
             ellipse(constants::PADDDLE_COLOR, [constants::WIDTH / 2.0, constants::HEIGHT / 2.0, 5.0, 5.0], context.transform, graphics);
 
-            // Game over logic
-            if !inplay {
-                let _ = text(
-                    constants::PADDDLE_COLOR, 
-                    28, 
-                    "GAME OVER", 
-                    &mut glyphs, 
-                    context.transform.trans(constants::HEIGHT/2.0, constants::WIDTH/2.0 - 100.0), 
-                    graphics
-                );
-                let _ = text(
-                    constants::PADDDLE_COLOR, 
-                    20, 
-                    " Press Q to exit",  // a very elegant solution to centering text 
-                    &mut glyphs, 
-                    context.transform.trans(constants::HEIGHT/2.0, constants::WIDTH/2.0 - 50.0), 
-                    graphics
-                );
-                started = false;
+            match state {
+                // Game over logic
+                utils::GameState::GameOver => {
+                    let _ = text(
+                        constants::PADDDLE_COLOR, 
+                        28, 
+                        "GAME OVER", 
+                        &mut glyphs, 
+                        context.transform.trans(constants::HEIGHT/2.0, constants::WIDTH/2.0 - 100.0), 
+                        graphics
+                    );
+                    let _ = text(
+                        constants::PADDDLE_COLOR, 
+                        20, 
+                        " Press Q to exit",  // a very elegant solution to centering text 
+                        &mut glyphs, 
+                        context.transform.trans(constants::HEIGHT/2.0, constants::WIDTH/2.0 - 50.0), 
+                        graphics
+                    );
+                }
+                // Main Game Loop
+                utils::GameState::InPlay => {
+                    utils::draw_forces(&forces, &ball, &context.draw_state, context.transform, graphics);
+                    let accel = force_fields::sum_forces(&forces, &ball);
+                    paddle.step();
+                    let inplay = ball.step(&paddle, accel);
+                    if !inplay {
+                        state = utils::GameState::GameOver
+                    }
+                }
+                _ => {}
             }
 
             glyphs.factory.encoder.flush(device);
@@ -87,20 +93,25 @@ fn main() {
         // Button press processing
         if let Some(args) = event.button_args() {
             if args.state == ButtonState::Press {
-                if args.button == Button::Keyboard(Key::Left) && started {
+                if args.button == Button::Keyboard(Key::Left) && matches!(state, utils::GameState::InPlay) {
                     paddle.move_horizontal(utils::Direction::Left); 
                 }
-                if args.button == Button::Keyboard(Key::Right) && started {
+                if args.button == Button::Keyboard(Key::Right) && matches!(state, utils::GameState::InPlay) {
                     paddle.move_horizontal(utils::Direction::Right); 
                 }
                 if args.button == Button::Keyboard(Key::Space) {
-                    started = !started;
+                    state = match state {
+                        utils::GameState::Paused | utils::GameState::NotStarted => utils::GameState::InPlay,
+                        utils::GameState::InPlay => utils::GameState::Paused,
+                        utils::GameState::GameOver => utils::GameState:: GameOver
+                    }
                 }
                 if args.button == Button::Keyboard(Key::Q) {
                     break;
                 }
             }
             if args.state == ButtonState::Release {
+                // Stop the paddle - otherwise it moves non stop
                 paddle.move_horizontal(utils::Direction::Stationary);
             }
         }

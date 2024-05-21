@@ -16,6 +16,14 @@ pub enum Direction {
     Stationary
 }
 
+#[derive(Debug)]
+pub enum GameState {
+    InPlay,
+    GameOver, 
+    NotStarted,
+    Paused
+}
+
 impl Location {
     pub fn normalize(&self) ->  Location {
         let magn = (self.x * self.x + self.y * self.y).sqrt();
