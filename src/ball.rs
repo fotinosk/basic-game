@@ -23,7 +23,7 @@ impl Ball {
         let b = Ball {
             position: utils::Location{
                 x: constants::WIDTH / 2.0, 
-                y: constants::HEIGHT - constants::OFFSET - 0.5 * constants::PADDLE_LEN - constants::BALLRADIUS 
+                y: constants::HEIGHT - constants::OFFSET - constants::PADDLE_HEIGHT - constants::BALLRADIUS 
             },
             direction: utils::Location{ x: constants::INIT_BALL_SPEED_X, y: constants::INIT_BALL_SPEED_Y },
             charge: 1.0,
