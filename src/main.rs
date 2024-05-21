@@ -15,7 +15,7 @@ fn main() {
     let mut inplay = true;
 
     let mut paddle = player::Paddle::new(constants::WIDTH, constants::HEIGHT, constants::OFFSET);
-    let mut ball = ball::Ball::new(constants::WIDTH, constants::HEIGHT, constants::OFFSET);
+    let mut ball = ball::Ball::new();
     let mut block_grid = block::BlockGrid::new(constants::NUM_BLOCK_ROWS, constants::NUM_BLOCK_COLS);
 
     // initialize forces here
@@ -47,17 +47,20 @@ fn main() {
     while let Some(event) = events.next(&mut window) {
         window.draw_2d(&event, |context, graphics, device| {
             clear([0.0; 4], graphics);
+
             if started {
                 utils::draw_forces(&forces, &ball, &context.draw_state, context.transform, graphics);
                 let accel = force_fields::sum_forces(&forces, &ball);
                 paddle.step();
                 inplay = ball.step(&paddle, accel);
             }
+
             paddle.draw(graphics, context.transform);
             ball.draw(graphics, context.transform);
             block_grid.draw(graphics, context.transform);
             ellipse(constants::PADDDLE_COLOR, [constants::WIDTH / 2.0, constants::HEIGHT / 2.0, 5.0, 5.0], context.transform, graphics);
 
+            // Game over logic
             if !inplay {
                 let _ = text(
                     constants::PADDDLE_COLOR, 
@@ -81,6 +84,7 @@ fn main() {
             glyphs.factory.encoder.flush(device);
         });
 
+        // Button press processing
         if let Some(args) = event.button_args() {
             if args.state == ButtonState::Press {
                 if args.button == Button::Keyboard(Key::Left) && started {

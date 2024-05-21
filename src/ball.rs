@@ -19,10 +19,13 @@ pub struct Ball {
 }
 
 impl Ball {
-    pub fn new(screen_width: f64 , screen_height: f64, paddle_height: f64) -> Ball {
+    pub fn new() -> Ball {
         let b = Ball {
-            position: utils::Location{x: screen_width / 2.0, y: screen_height - 2.5 * paddle_height},
-            direction: utils::Location{ x: 3.0, y: -3.0 },
+            position: utils::Location{
+                x: constants::WIDTH / 2.0, 
+                y: constants::HEIGHT - constants::OFFSET - 0.5 * constants::PADDLE_LEN - constants::BALLRADIUS 
+            },
+            direction: utils::Location{ x: constants::INIT_BALL_SPEED_X, y: constants::INIT_BALL_SPEED_Y },
             charge: 1.0,
             radius: constants::BALLRADIUS
         };
@@ -82,7 +85,7 @@ impl Ball {
         else if self.position.x > constants::WIDTH - self.radius {
             BounceObj::RightWall
         }
-        else if self.position.y > constants::HEIGHT - 2.5 * constants::OFFSET && 
+        else if self.position.y > constants::HEIGHT - constants::OFFSET - 0.5 * constants::PADDLE_HEIGHT - constants::BALLRADIUS  && 
         paddle.position_lower_left.x < self.position.x &&
         self.position.x < paddle.position_lower_left.x + paddle.width {
                 BounceObj::Paddle

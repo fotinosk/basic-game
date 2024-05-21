@@ -29,11 +29,11 @@ impl Paddle {
     pub fn step(&mut self) {
         match self.move_direction {
             utils::Direction::Left => {
-                self.position_lower_left.x -= constants::SPEED;
+                self.position_lower_left.x -= constants::SPEED * constants::DT;
                 self.position_lower_left.x = self.position_lower_left.x.max(0.0);
             }
             utils::Direction::Right => {
-                self.position_lower_left.x += constants::SPEED;
+                self.position_lower_left.x += constants::SPEED * constants::DT;
                 self.position_lower_left.x = (self.position_lower_left.x).min(constants::WIDTH - constants::PADDLE_LEN);
             }
             utils::Direction::Stationary => {}

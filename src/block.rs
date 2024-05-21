@@ -31,11 +31,11 @@ impl Block {
         } else {
             color = constants::NEGATIVE_BLOCK_COLOR;
         }
-        let lower_left_x = self.position.x - self.width / 2.0;
-        let lower_left_y = self.position.y - self.height / 2.0;
+        let lower_left_x = self.position.x - self.width / 2.0 - constants::BLOCK_VISIBILITY_MARGIN;
+        let lower_left_y = self.position.y - self.height / 2.0 - constants::BLOCK_VISIBILITY_MARGIN;
         rectangle(
             color, 
-            [lower_left_x, lower_left_y, self.width, self.height], 
+            [lower_left_x, lower_left_y, self.width - constants::BLOCK_VISIBILITY_MARGIN, self.height - constants::BLOCK_VISIBILITY_MARGIN], 
             transform, 
             g
         )
