@@ -49,7 +49,7 @@ impl Ball {
         match bounce {
             BounceObj::NoBounce => { true },
             BounceObj::Paddle => {
-                // the y coord need to be negative
+                // the y coord needs to be negative
                 self.direction.y = self.direction.y.abs() * -1.0; 
                 true
             }

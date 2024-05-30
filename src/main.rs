@@ -50,9 +50,9 @@ fn main() {
             clear([0.0; 4], graphics);
 
             paddle.draw(graphics, context.transform);
-            ball.draw(graphics, context.transform);
             block_grid.draw(graphics, context.transform);
             ellipse(constants::PADDDLE_COLOR, [constants::WIDTH / 2.0, constants::HEIGHT / 2.0, 5.0, 5.0], context.transform, graphics);
+            ball.draw(graphics, context.transform);  // always draw ball last
 
             match state {
                 // Game over logic
@@ -76,13 +76,24 @@ fn main() {
                 }
                 // Main Game Loop
                 utils::GameState::InPlay => {
-                    utils::draw_forces(&forces, &ball, &context.draw_state, context.transform, graphics);
+                    // utils::draw_forces(&forces, &ball, &context.draw_state, context.transform, graphics);
                     let accel = force_fields::sum_forces(&forces, &ball);
                     paddle.step();
+
+                    // Detect ball-block colision here
+                    let block_colision = block_grid.step(&ball);
+                    // if !matches!(block_colision, block::Collision::NoCollision) {
+                    //     block_grid.draw_nearest_block_center(&ball, graphics, context.transform);
+                    // }
+
                     let inplay = ball.step(&paddle, accel);
                     if !inplay {
                         state = utils::GameState::GameOver
                     }
+                }
+                utils::GameState::Paused => {
+                    // utils::draw_forces(&forces, &ball, &context.draw_state, context.transform, graphics);
+                    // block_grid.draw_nearest_block_center(&ball, graphics, context.transform);
                 }
                 _ => {}
             }
