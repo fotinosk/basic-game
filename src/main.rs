@@ -76,7 +76,6 @@ fn main() {
                 }
                 // Main Game Loop
                 utils::GameState::InPlay => {
-                    // utils::draw_forces(&forces, &ball, &context.draw_state, context.transform, graphics);
                     let accel = force_fields::sum_forces(&forces, &ball);
                     paddle.step();
 
