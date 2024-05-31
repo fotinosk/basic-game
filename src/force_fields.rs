@@ -1,4 +1,4 @@
-use crate::{ball::Ball, utils, constants};
+use crate::{ball::Ball, constants, utils};
 
 pub trait Force {
     fn excert_force(&self, ball: &Ball) -> utils::Location;
@@ -8,24 +8,30 @@ pub trait Force {
 
 pub struct Gravity {
     center: utils::Location,
-    strength: f64
+    strength: f64,
 }
 
 impl Gravity {
     pub fn new() -> Gravity {
-            let gr = Gravity{ 
-                center: utils::Location { x: constants::WIDTH / 2.0 , y: 100000.0 } ,
-                strength: constants::GRAVITATIONAL_STRENGTH
-            };
-            gr
-        }
+        let gr = Gravity {
+            center: utils::Location {
+                x: constants::WIDTH / 2.0,
+                y: 100000.0,
+            },
+            strength: constants::GRAVITATIONAL_STRENGTH,
+        };
+        gr
+    }
 }
 
 impl Force for Gravity {
-    fn excert_force (&self ,ball: &Ball) -> utils::Location {
-        let direction = utils::Location{x: ball.position.x - self.center.x , y: ball.position.y - self.center.y};
+    fn excert_force(&self, ball: &Ball) -> utils::Location {
+        let direction = utils::Location {
+            x: ball.position.x - self.center.x,
+            y: ball.position.y - self.center.y,
+        };
         let unit_vector = direction.normalize();
-        unit_vector.scale(self.strength) 
+        unit_vector.scale(self.strength)
     }
     fn get_center(&self) -> [f64; 2] {
         [self.center.x, self.center.y]
@@ -37,26 +43,28 @@ impl Force for Gravity {
 
 pub struct ElectricField {
     center: utils::Location,
-    q: f64
+    q: f64,
 }
 
 impl ElectricField {
     pub fn new(x: f64, y: f64) -> ElectricField {
-        let em = ElectricField{
+        let em = ElectricField {
             center: utils::Location { x, y },
-            q: constants::ELECTRIC_FIELD_STRENGTH
+            q: constants::ELECTRIC_FIELD_STRENGTH,
         };
         em
     }
-    
 }
 
 impl Force for ElectricField {
     fn get_center(&self) -> [f64; 2] {
         [self.center.x, self.center.y]
     }
-    fn excert_force (&self, ball: &Ball) -> utils::Location {
-        let direction = utils::Location{x: ball.position.x - self.center.x , y: ball.position.y - self.center.y};
+    fn excert_force(&self, ball: &Ball) -> utils::Location {
+        let direction = utils::Location {
+            x: ball.position.x - self.center.x,
+            y: ball.position.y - self.center.y,
+        };
         let dist = direction.magnitute();
         let unit_vector = direction.normalize();
         let factor = self.q / (dist * dist);
@@ -69,7 +77,7 @@ impl Force for ElectricField {
 }
 
 pub fn sum_forces(forces: &[Box<dyn Force>], ball: &Ball) -> utils::Location {
-    let mut total_force = utils::Location{ x: 0.0, y: 0.0};
+    let mut total_force = utils::Location { x: 0.0, y: 0.0 };
 
     for f in forces {
         let force = f.excert_force(ball);
