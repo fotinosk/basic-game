@@ -5,6 +5,7 @@ use std::collections::HashMap;
 use crate::{ball::Ball, constants, utils};
 use piston_window::*;
 
+#[derive(Debug)]
 pub enum Collision {
     Left,
     Right,
@@ -137,7 +138,7 @@ impl BlockGrid {
         {
             // need to figure out from which direction is the colision
             // and which block is collided
-            self.detect_block_collision(&ball)
+            return self.detect_block_collision(&ball)
         } else {
             Collision::NoCollision
         }
@@ -196,6 +197,7 @@ impl BlockGrid {
         //     }
         // }
 
+        // FIXME: Issue with collision reporting - all are no collisions
         if ball_new_loc[0] > left_border && ball_location[0] < left_border {
             return Collision::Left
         }
@@ -208,7 +210,8 @@ impl BlockGrid {
         if ball_new_loc[1] < bottom_border && ball_location[1] > bottom_border {
             return Collision::Top
         }
-        Collision::NoCollision
+        // Collision::NoCollision
+        panic!("Could not determine collision direction")
 
     }
 

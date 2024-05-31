@@ -1,4 +1,4 @@
-use crate::{constants, player::Paddle, utils};
+use crate::{block, constants, player::Paddle, utils};
 use piston_window::*;
 
 #[derive(Debug)]
@@ -49,41 +49,67 @@ impl Ball {
     pub fn get_direction(&self) -> utils::Location {
        self.direction 
     }
-    pub fn step(&mut self, paddle: &Paddle, acceleration: utils::Location) -> bool {
+    pub fn step(&mut self, paddle: &Paddle, acceleration: utils::Location, collision: block::Collision) -> bool {
         self.direction.x += acceleration.x * constants::DT;
         self.direction.y += acceleration.y * constants::DT;
 
         self.position.x = self.position.x + self.direction.x * constants::DT;
         self.position.y = self.position.y + self.direction.y * constants::DT;
 
-        let bounce = self.check_bounce(&paddle);
-
-        match bounce {
-            BounceObj::NoBounce => true,
-            BounceObj::Paddle => {
-                // the y coord needs to be negative
-                self.direction.y = self.direction.y.abs() * -1.0;
-                true
-            }
-            BounceObj::TopWall => {
+        match collision {
+            block::Collision::Top => {
+                println!("change of direction");
                 self.direction.y = self.direction.y.abs();
                 true
             }
-            BounceObj::LeftWall => {
-                self.direction.x = self.direction.x.abs();
+            block::Collision::Bottom => {
+                println!("change of direction");
+                self.direction.y = self.direction.y.abs() * -1.0;
                 true
             }
-            BounceObj::RightWall => {
+            block::Collision::Left => {
+                println!("change of direction");
                 self.direction.x = self.direction.x.abs() * -1.0;
                 true
             }
-            BounceObj::BottomWall => {
-                println!("Ball is out of bounds, game over");
-                false
+            block::Collision::Right => {
+                println!("change of direction");
+                self.direction.x = self.direction.x.abs();
+                true
+            }
+            block::Collision::NoCollision => {
+                let bounce = self.check_bounce(&paddle);
+
+                match bounce {
+                    BounceObj::NoBounce => true,
+                    BounceObj::Paddle => {
+                        // the y coord needs to be negative
+                        self.direction.y = self.direction.y.abs() * -1.0;
+                        true
+                    }
+                    BounceObj::TopWall => {
+                        self.direction.y = self.direction.y.abs();
+                        true
+                    }
+                    BounceObj::LeftWall => {
+                        self.direction.x = self.direction.x.abs();
+                        true
+                    }
+                    BounceObj::RightWall => {
+                        self.direction.x = self.direction.x.abs() * -1.0;
+                        true
+                    }
+                    BounceObj::BottomWall => {
+                        println!("Ball is out of bounds, game over");
+                        false
+                    }
+                }
             }
         }
+
+
     }
-    fn check_bounce(&mut self, paddle: &Paddle) -> BounceObj {
+    fn check_bounce(&self, paddle: &Paddle) -> BounceObj {
         if self.position.y < 0.0 {
             BounceObj::TopWall
         } else if self.position.y > constants::HEIGHT {
