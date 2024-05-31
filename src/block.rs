@@ -1,4 +1,5 @@
 use rand::Rng;
+use core::panic;
 use std::collections::HashMap;
 
 use crate::{ball::Ball, constants, utils};
@@ -142,56 +143,73 @@ impl BlockGrid {
         }
     }
 
-    pub fn draw_nearest_block_center<G: Graphics>(
-        &self,
-        ball: &Ball,
-        g: &mut G,
-        transform: [[f64; 3]; 2],
-    ) {
-        // TODO: utility function, remove later
-        let center_loc = self.get_nearest_block_center(ball.get_centre());
-        ellipse(
-            [1.0, 1.0, 1.0, 1.0],
-            [center_loc[0], center_loc[1], 12.0, 12.0],
-            transform,
-            g,
-        )
-    }
-
     fn detect_block_collision(&mut self, ball: &Ball) -> Collision {
-        // Detect if it was a collision, the direction so the ball direction can be updated and
-        // remove the collided block
-
+        // Determine if the ball collides with an active block, if it does, then deactivate the
+        // block and share the collision direction so it can change the ball trajectory
         let nearest_block_coords = self.get_nearest_block_center(ball.get_centre());
-        // let nearest_block = self.block_store.get(&utils::Location {
-        //     x: nearest_block_coords[0],
-        //     y: nearest_block_coords[1],
-        // });
 
-        // step the ball forward and see where it collides
-        // edge case when it could collide with corner
-        let block_min_x = nearest_block_coords[0] - constants::BLOCK_WIDTH / 2.0;
-        let block_max_x = nearest_block_coords[0] + constants::BLOCK_WIDTH / 2.0;
+        let ball_location = ball.get_centre();
+        let ball_direction = ball.get_direction();
+        let ball_new_loc = [ball_location[0] + ball_direction.x * constants::DT, ball_location[1] + ball_direction.y * constants::DT];
 
-        let block_min_y = nearest_block_coords[1] - constants::BLOCK_HEIGHT / 2.0;
-        let block_max_y = nearest_block_coords[1] + constants::BLOCK_HEIGHT / 2.0;
+        let left_border = nearest_block_coords[0] - constants::BLOCK_WIDTH / 2.0 - constants::BALLRADIUS;
+        let right_border = nearest_block_coords[0] + constants::BLOCK_WIDTH / 2.0 + constants::BALLRADIUS;
+        let bottom_border = nearest_block_coords[1] - constants::BLOCK_HEIGHT/ 2.0 - constants::BALLRADIUS; 
+        let top_border = nearest_block_coords[1] + constants::BLOCK_HEIGHT/ 2.0 + constants::BALLRADIUS; 
 
-        let ball_loc = ball.get_centre();
-        let ball_dir = ball.get_direction();
-        
-        // Collision is detected by angle and distance
-        // 3 important angles, alpha, beta, gamma
-        
-        let tan_ball_theta = ball_dir.y / ball_dir.x;
-        let ball_speed = ball_dir.magnitute();
+        if ball_new_loc[0] < left_border {
+            return Collision::NoCollision
+        }
+        if ball_new_loc[0] > right_border {
+            return Collision::NoCollision
+        }
+        if ball_new_loc[1] < bottom_border {
+            return Collision::NoCollision
+        }
+        if ball_new_loc[1] > top_border {
+            return Collision::NoCollision
+        }
 
-        // depending on the scenario, figure out which is alpha beta and gamma
-        let tan_upper_left = block_min_y - ball_loc[1] / block_min_x - ball_loc[0];
-        let tan_upper_right = block_min_y - ball_loc[1] / block_max_x - ball_loc[0];
-        let tan_lower_left = block_max_y - ball_loc[1] / block_min_x - ball_loc[0];
-        let tan_lower_right = block_max_y - ball_loc[1] / block_max_x - ball_loc[0];
+        // there must be a collision
+        // check that the nearest block is active, otherwise it won't collide
+        let nearest_block = self.block_store.get_mut(&utils::Location {
+            x: nearest_block_coords[0],
+            y: nearest_block_coords[1],
+        }).unwrap();
 
-        Collision::Top // Placeholder
+        if !nearest_block.active {
+            return Collision::NoCollision
+        }
+        else {
+            nearest_block.deactivate();
+        }
+
+        // match nearest_block {
+        //     None => panic!("Error could not find nearest block"),
+        //     Some(&mut Block) => {
+        //         if !Block.active {
+        //             return Collision::NoCollision
+        //         }
+        //         else {
+        //             Block.deactivate()
+        //         }
+        //     }
+        // }
+
+        if ball_new_loc[0] > left_border && ball_location[0] < left_border {
+            return Collision::Left
+        }
+        if ball_new_loc[0] < right_border && ball_location[0] > right_border {
+            return Collision::Right
+        }
+        if ball_new_loc[1] > bottom_border && ball_location[1] < bottom_border {
+            return Collision::Bottom
+        }
+        if ball_new_loc[1] < bottom_border && ball_location[1] > bottom_border {
+            return Collision::Top
+        }
+        Collision::NoCollision
+
     }
 
     fn get_nearest_block_center(&self, ball_location: [f64; 2]) -> [f64; 2] {
