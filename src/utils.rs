@@ -1,6 +1,6 @@
 use std::hash::{Hash, Hasher};
 
-use crate::{ball, constants, force_fields::Force, utils};
+use crate::{ball, constants, force_fields::{self, Force}, utils};
 use piston_window::*;
 
 #[derive(Debug, Clone, Copy)]
@@ -54,6 +54,7 @@ impl PartialEq for Location {
         self.x == other.x && self.y == other.y
     }
 }
+
 impl Eq for Location {} // only PartialEq needed
 
 impl Hash for Location {
@@ -84,7 +85,29 @@ pub fn color_by_distance(body1: &[f64; 2], body2: &[f64; 2]) -> [f32; 4] {
 }
 
 pub fn draw_forces<G: Graphics>(
-    forces: &[Box<dyn Force>],
+    forces: &[Box<dyn force_fields::Force>],
+    ball: &ball::Ball,
+    draw_state: &DrawState,
+    trnsf: [[f64; 3]; 2],
+    graphics: &mut G,
+) {
+    for force in forces {
+        line::Line::new(
+            utils::color_by_distance(&ball.get_centre(), &force.get_center()),
+            2.0,
+        )
+        .draw_from_to(
+            ball.get_centre(),
+            force.get_center(),
+            draw_state,
+            trnsf,
+            graphics,
+        )
+    }
+}
+
+pub fn draw_block_forces<G: Graphics>(
+    forces: &Vec<force_fields::ElectricField>,
     ball: &ball::Ball,
     draw_state: &DrawState,
     trnsf: [[f64; 3]; 2],

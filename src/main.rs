@@ -15,17 +15,18 @@ fn main() {
     // initialize game objects
     let mut paddle = player::Paddle::new(constants::WIDTH, constants::HEIGHT, constants::OFFSET);
     let mut ball = ball::Ball::new();
-    let mut block_grid =
-        block::BlockGrid::new(constants::NUM_BLOCK_ROWS, constants::NUM_BLOCK_COLS);
+    let mut block_grid =block::BlockGrid::new(constants::NUM_BLOCK_ROWS, constants::NUM_BLOCK_COLS);
 
     // initialize forces here
     let forces: Vec<Box<dyn Force>> = vec![
         Box::new(force_fields::Gravity::new()),
-        Box::new(force_fields::ElectricField::new(
-            constants::WIDTH / 2.0,
-            constants::HEIGHT / 2.0,
-        )),
+        // Box::new(force_fields::ElectricField::new(
+        //     constants::WIDTH / 2.0,
+        //     constants::HEIGHT / 2.0,
+        //     true 
+        // )),
     ];
+    let mut block_forces = block_grid.get_forces();
 
     // initialize gui
     let mut window: PistonWindow =
@@ -56,17 +57,11 @@ fn main() {
 
             paddle.draw(graphics, context.transform);
             block_grid.draw(graphics, context.transform);
-            ellipse(
-                constants::PADDDLE_COLOR,
-                [constants::WIDTH / 2.0, constants::HEIGHT / 2.0, 5.0, 5.0],
-                context.transform,
-                graphics,
-            );
             ball.draw(graphics, context.transform); // always draw ball last
 
             match state {
-                // Game over logic
                 utils::GameState::GameOver => {
+                    // Game over logic
                     let _ = text(
                         constants::PADDDLE_COLOR,
                         28,
@@ -88,14 +83,22 @@ fn main() {
                         graphics,
                     );
                 }
-                // Main Game Loop
                 utils::GameState::InPlay => {
+                    // Main Game Loop
+                    block_forces = block_grid.get_forces();
                     let accel = force_fields::sum_forces(&forces, &ball);
+                    let block_accel = force_fields::sum_block_forces(&block_forces, &ball);
+                    let total_accel = utils::Location{
+                        x: accel.x + block_accel.x,
+                        y: accel.y + block_accel.y,
+                    };
                     paddle.step();
 
                     // Detect ball-block colision here
                     let block_collision = block_grid.step(&ball);
-                    let inplay = ball.step(&paddle, accel, block_collision);
+                    // let inplay = ball.step(&paddle, accel, block_collision);
+                    let inplay = ball.step(&paddle, total_accel, block_collision);
+
                     if !inplay {
                         state = utils::GameState::GameOver
                     }
@@ -105,6 +108,7 @@ fn main() {
                 }
                 utils::GameState::Paused => {
                     utils::draw_forces(&forces, &ball, &context.draw_state, context.transform, graphics);
+                    utils::draw_block_forces(&block_forces, &ball, &context.draw_state, context.transform, graphics);
                 }
                 utils::GameState::Finished => {
                     // Win Screen

@@ -1,7 +1,7 @@
 use rand::Rng;
 use std::collections::HashMap;
 
-use crate::{ball::Ball, constants, utils};
+use crate::{ball::Ball, constants, force_fields, utils};
 use piston_window::*;
 
 #[derive(Debug, Clone, Copy)]
@@ -122,6 +122,18 @@ impl BlockGrid {
                 val.draw(g, transform)
             }
         }
+    }
+
+    pub fn get_forces(&self) -> Vec<force_fields::ElectricField> {
+        let mut forces = vec![];
+        for (loc, val) in &self.block_store {
+            if val.active && val.charge != 0.0 {
+                let attr = if val.charge > 0.0 { true } else { false };
+                let force = force_fields::ElectricField::new(loc.x, loc.y, attr);
+                forces.push(force);
+            }
+        }
+        forces
     }
 
     pub fn step(&mut self, ball: &Ball) -> Collision {

@@ -47,10 +47,15 @@ pub struct ElectricField {
 }
 
 impl ElectricField {
-    pub fn new(x: f64, y: f64) -> ElectricField {
+    pub fn new(x: f64, y: f64, attractive: bool) -> ElectricField {
+        let mult: f64;
+        match attractive {
+            true => {mult = 1.0;},
+            false => {mult = -1.0;}
+        }
         let em = ElectricField {
             center: utils::Location { x, y },
-            q: constants::ELECTRIC_FIELD_STRENGTH,
+            q: constants::ELECTRIC_FIELD_STRENGTH * mult,
         };
         em
     }
@@ -60,6 +65,7 @@ impl Force for ElectricField {
     fn get_center(&self) -> [f64; 2] {
         [self.center.x, self.center.y]
     }
+
     fn excert_force(&self, ball: &Ball) -> utils::Location {
         let direction = utils::Location {
             x: ball.position.x - self.center.x,
@@ -71,12 +77,24 @@ impl Force for ElectricField {
 
         unit_vector.scale(factor)
     }
+
     fn print_name(&self) {
         println!("EM")
     }
 }
 
 pub fn sum_forces(forces: &[Box<dyn Force>], ball: &Ball) -> utils::Location {
+    let mut total_force = utils::Location { x: 0.0, y: 0.0 };
+
+    for f in forces {
+        let force = f.excert_force(ball);
+        total_force.x += force.x;
+        total_force.y += force.y;
+    }
+    total_force
+}
+
+pub fn sum_block_forces(forces: &Vec<ElectricField>, ball: &Ball) -> utils::Location {
     let mut total_force = utils::Location { x: 0.0, y: 0.0 };
 
     for f in forces {
