@@ -155,7 +155,6 @@ impl BlockGrid {
 
         let ball_direction = ball.get_direction();
         let ball_new_loc = [ball_location[0] + ball_direction.x * constants::DT, ball_location[1] + ball_direction.y * constants::DT];
-        // let nearest_block_coords = self.get_nearest_block_center(ball_new_loc);
 
         let left_border = nearest_block_coords[0] - constants::BLOCK_WIDTH / 2.0;
         let right_border = nearest_block_coords[0] + constants::BLOCK_WIDTH / 2.0;
@@ -191,10 +190,10 @@ impl BlockGrid {
             nearest_block.deactivate();
 
             // calculate collision here relating to the deactivated block
-            let d_left = (ball_new_loc[0] - left_border) / (constants::BLOCK_WIDTH / constants::BLOCK_HEIGHT);
-            let d_right = (right_border - ball_new_loc[0]) / (constants::BLOCK_WIDTH / constants::BLOCK_HEIGHT);
-            let d_top = ball_new_loc[1] - top_border;
-            let d_bottom = bottom_border - ball_new_loc[1];
+            let d_left = (ball_new_loc[0] - left_border) / constants::BLOCK_WIDTH;
+            let d_right = (right_border - ball_new_loc[0]) / constants::BLOCK_WIDTH;
+            let d_top = (ball_new_loc[1] - top_border) / constants::BLOCK_HEIGHT;
+            let d_bottom = (bottom_border - ball_new_loc[1]) / constants::BLOCK_HEIGHT;
 
             let distances = [d_left, d_right, d_top, d_bottom];
             println!("{:?}", distances);  // all should be positive
@@ -205,7 +204,6 @@ impl BlockGrid {
                 .min_by(|(_, a), (_, b)| a.total_cmp(b))
                 .unwrap();  // I think I have commited servaral crimes here
             
-            // FIXME: bottom collisions are not working as expected
             match index_of_min {
                 0 => Collision::Left,
                 1 => Collision::Right,

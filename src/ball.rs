@@ -58,11 +58,11 @@ impl Ball {
 
         match collision {
             block::Collision::Top => {
-                self.direction.y = self.direction.y.abs();
+                self.direction.y = self.direction.y.abs() * -1.0;
                 true
             }
             block::Collision::Bottom => {
-                self.direction.y = self.direction.y.abs() * -1.0;
+                self.direction.y = self.direction.y.abs();
                 true
             }
             block::Collision::Left => {
