@@ -156,8 +156,8 @@ impl BlockGrid {
         let right_border = nearest_block_coords[0] + constants::BLOCK_WIDTH / 2.0;
 
         // y axis is inverted
-        let bottom_border = nearest_block_coords[1] + constants::BLOCK_HEIGHT/ 2.0; 
-        let top_border = nearest_block_coords[1] - constants::BLOCK_HEIGHT/ 2.0; 
+        let bottom_border = nearest_block_coords[1] + constants::BLOCK_HEIGHT / 2.0; 
+        let top_border = nearest_block_coords[1] - constants::BLOCK_HEIGHT / 2.0; 
 
         if ball_location[0] < left_border {
             return Collision::NoCollision

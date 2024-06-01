@@ -26,7 +26,7 @@ impl Ball {
                 y: constants::HEIGHT
                     - constants::OFFSET
                     - constants::PADDLE_HEIGHT
-                    - constants::BALLRADIUS,
+                    - constants::BALLRADIUS / 2.0,
             },
             direction: utils::Location {
                 x: constants::INIT_BALL_SPEED_X,
@@ -37,17 +37,15 @@ impl Ball {
         };
         b
     }
-    fn get_dims(&self) -> [f64; 4] {
-        [self.position.x - self.radius / 2.0, self.position.y - self.radius / 2.0, self.radius, self.radius]
-    }
+
     pub fn get_centre(&self) -> [f64; 2] {
         [
-            self.position.x + self.radius / 2.0,
-            self.position.y + self.radius / 2.0,
+            self.position.x,
+            self.position.y,
         ]
     }
+
     pub fn step(&mut self, paddle: &Paddle, acceleration: utils::Location, collision: block::Collision) -> bool {
-        
         self.direction.x += acceleration.x * constants::DT;
         self.direction.y += acceleration.y * constants::DT;
 
@@ -111,9 +109,8 @@ impl Ball {
                 }
             }
         }
-
-
     }
+
     fn check_bounce(&self, paddle: &Paddle) -> BounceObj {
         if self.position.y < 0.0 {
             BounceObj::TopWall
@@ -136,7 +133,13 @@ impl Ball {
             BounceObj::NoBounce
         }
     }
+
     pub fn draw<G: Graphics>(&self, g: &mut G, transform: [[f64; 3]; 2]) {
-        ellipse(constants::BALL_COLOR, self.get_dims(), transform, g);
+        let dims = [
+            self.position.x - self.radius / 2.0, 
+            self.position.y - self.radius / 2.0, 
+            self.radius, self.radius
+        ];
+        ellipse(constants::BALL_COLOR, dims, transform, g);
     }
 }

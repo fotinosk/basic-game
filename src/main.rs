@@ -104,8 +104,7 @@ fn main() {
                     }
                 }
                 utils::GameState::Paused => {
-                    // utils::draw_forces(&forces, &ball, &context.draw_state, context.transform, graphics);
-                    // block_grid.draw_nearest_block_center(&ball, graphics, context.transform);
+                    utils::draw_forces(&forces, &ball, &context.draw_state, context.transform, graphics);
                 }
                 utils::GameState::Finished => {
                     // Win Screen
