@@ -22,6 +22,7 @@ pub enum GameState {
     GameOver,
     NotStarted,
     Paused,
+    Finished
 }
 
 impl Location {

@@ -5,7 +5,7 @@ pub const OFFSET: f64 = 20.0;
 pub const PADDDLE_COLOR: [f32; 4] = [1.0, 0.0, 0.0, 1.0];
 pub const PADDLE_FRICTION_COMPONENT: f64 = 1.0;
 
-pub const DT: f64 = 1.5;
+pub const DT: f64 = 1.0;
 
 pub const BALLRADIUS: f64 = 10.0;
 pub const BALL_COLOR: [f32; 4] = [1.0, 1.0, 0.0, 1.0];

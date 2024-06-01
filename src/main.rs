@@ -94,15 +94,31 @@ fn main() {
                     paddle.step();
 
                     // Detect ball-block colision here
-                    let block_collision = block_grid.step(&ball, graphics, context.transform);
+                    let block_collision = block_grid.step(&ball);
                     let inplay = ball.step(&paddle, accel, block_collision);
                     if !inplay {
                         state = utils::GameState::GameOver
+                    }
+                    if block_grid.active_blocks == 0 {
+                        state = utils::GameState::Finished
                     }
                 }
                 utils::GameState::Paused => {
                     // utils::draw_forces(&forces, &ball, &context.draw_state, context.transform, graphics);
                     // block_grid.draw_nearest_block_center(&ball, graphics, context.transform);
+                }
+                utils::GameState::Finished => {
+                    // Win Screen
+                    let _ = text(
+                        constants::PADDDLE_COLOR,
+                        28,
+                        "WINNER WINNER, CHICKEN DINNER!",
+                        &mut glyphs,
+                        context
+                            .transform
+                            .trans(constants::WIDTH / 2.0 - 250.0, constants::HEIGHT / 2.0),
+                        graphics,
+                    );
                 }
                 _ => {}
             }
@@ -130,6 +146,7 @@ fn main() {
                         }
                         utils::GameState::InPlay => utils::GameState::Paused,
                         utils::GameState::GameOver => utils::GameState::GameOver,
+                        utils::GameState::Finished => utils::GameState::Finished,
                     }
                 }
                 if args.button == Button::Keyboard(Key::Q) {

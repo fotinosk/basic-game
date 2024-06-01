@@ -46,9 +46,6 @@ impl Ball {
             self.position.y + self.radius / 2.0,
         ]
     }
-    pub fn get_direction(&self) -> utils::Location {
-       self.direction 
-    }
     pub fn step(&mut self, paddle: &Paddle, acceleration: utils::Location, collision: block::Collision) -> bool {
         
         self.direction.x += acceleration.x * constants::DT;

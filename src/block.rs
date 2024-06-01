@@ -1,5 +1,4 @@
 use rand::Rng;
-use core::panic;
 use std::collections::HashMap;
 
 use crate::{ball::Ball, constants, utils};
@@ -75,6 +74,7 @@ pub struct BlockGrid {
     horizontal_offset: f64,
     vertical_offset: f64,
     block_store: HashMap<utils::Location, Block>, // hashmap indexed by block center location
+    pub active_blocks: u8
 }
 
 impl BlockGrid {
@@ -110,6 +110,7 @@ impl BlockGrid {
             horizontal_offset: hor_offset,
             vertical_offset: constants::VERTICAL_BLOCK_OFFSET,
             block_store,
+            active_blocks: num_rows * num_cols
         };
 
         block_grid
@@ -123,7 +124,7 @@ impl BlockGrid {
         }
     }
 
-    pub fn step<G: Graphics>(&mut self, ball: &Ball, g: &mut G, transform: [[f64;3]; 2]) -> Collision {
+    pub fn step(&mut self, ball: &Ball) -> Collision {
         // Check if there has been a colision between the block grid and the ball, return the
         // result so the ball can be updated too. Delete the colided with block
         let x_min = self.horizontal_offset;
@@ -138,7 +139,6 @@ impl BlockGrid {
         {
             // need to figure out from which direction is the colision
             // and which block is collided
-            // self.draw_nearest_block_center(ball, g, transform);
             return self.detect_block_collision(&ball)
         } else {
             Collision::NoCollision
@@ -149,7 +149,6 @@ impl BlockGrid {
         // Determine if the ball collides with an active block, if it does, then deactivate the
         // block and share the collision direction so it can change the ball trajectory
 
-        // plan to get nearest block is not working - it will only get close to deactivated blocks
         let ball_location = ball.get_centre();
         let nearest_block_coords = self.get_nearest_block_center(ball_location);
 
@@ -185,6 +184,7 @@ impl BlockGrid {
         }
         else {
             nearest_block.deactivate();
+            self.active_blocks -= 1;
 
             // calculate collision here relating to the deactivated block
             let d_left = (ball_location[0] - left_border) / constants::BLOCK_WIDTH;
@@ -226,15 +226,5 @@ impl BlockGrid {
             self.horizontal_offset + (block_incr_x as f64 + 0.5) * constants::BLOCK_WIDTH,
             self.vertical_offset + (block_incr_y as f64 + 0.5) * constants::BLOCK_HEIGHT,
         ];
-    }
-
-    pub fn draw_nearest_block_center<G: Graphics>(&self, ball: &Ball, g: &mut G, transform: [[f64;3]; 2]) {
-        let center_loc = self.get_nearest_block_center(ball.get_centre());
-        ellipse(
-            [1.0, 1.0, 1.0, 1.0], 
-            [center_loc[0] - 6.0, center_loc[1] - 6.0, 12.0, 12.0], 
-            transform, 
-            g
-        )
     }
 }
