@@ -37,8 +37,8 @@ impl Ball {
         };
         b
     }
-    pub fn get_dims(&self) -> [f64; 4] {
-        [self.position.x, self.position.y, self.radius, self.radius]
+    fn get_dims(&self) -> [f64; 4] {
+        [self.position.x - self.radius / 2.0, self.position.y - self.radius / 2.0, self.radius, self.radius]
     }
     pub fn get_centre(&self) -> [f64; 2] {
         [
@@ -58,26 +58,24 @@ impl Ball {
 
         match collision {
             block::Collision::Top => {
-                println!("change of direction");
                 self.direction.y = self.direction.y.abs();
                 true
             }
             block::Collision::Bottom => {
-                println!("change of direction");
                 self.direction.y = self.direction.y.abs() * -1.0;
                 true
             }
             block::Collision::Left => {
-                println!("change of direction");
                 self.direction.x = self.direction.x.abs() * -1.0;
                 true
             }
             block::Collision::Right => {
-                println!("change of direction");
                 self.direction.x = self.direction.x.abs();
                 true
             }
             block::Collision::NoCollision => {
+                // TODO: introduce some friction between paddle and ball allowing the paddle to aim
+                // the ball in some way. The paddle can slightly change the x-direction of the ball
                 let bounce = self.check_bounce(&paddle);
 
                 match bounce {

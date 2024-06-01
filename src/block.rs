@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use crate::{ball::Ball, constants, utils};
 use piston_window::*;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum Collision {
     Left,
     Right,
@@ -123,7 +123,7 @@ impl BlockGrid {
         }
     }
 
-    pub fn step(&mut self, ball: &Ball) -> Collision {
+    pub fn step<G: Graphics>(&mut self, ball: &Ball, g: &mut G, transform: [[f64;3]; 2]) -> Collision {
         // Check if there has been a colision between the block grid and the ball, return the
         // result so the ball can be updated too. Delete the colided with block
         let x_min = self.horizontal_offset;
@@ -138,6 +138,7 @@ impl BlockGrid {
         {
             // need to figure out from which direction is the colision
             // and which block is collided
+            // self.draw_nearest_block_center(ball, g, transform);
             return self.detect_block_collision(&ball)
         } else {
             Collision::NoCollision
@@ -147,16 +148,21 @@ impl BlockGrid {
     fn detect_block_collision(&mut self, ball: &Ball) -> Collision {
         // Determine if the ball collides with an active block, if it does, then deactivate the
         // block and share the collision direction so it can change the ball trajectory
-        let nearest_block_coords = self.get_nearest_block_center(ball.get_centre());
 
+        // plan to get nearest block is not working - it will only get close to deactivated blocks
         let ball_location = ball.get_centre();
+        let nearest_block_coords = self.get_nearest_block_center(ball_location);
+
         let ball_direction = ball.get_direction();
         let ball_new_loc = [ball_location[0] + ball_direction.x * constants::DT, ball_location[1] + ball_direction.y * constants::DT];
+        // let nearest_block_coords = self.get_nearest_block_center(ball_new_loc);
 
-        let left_border = nearest_block_coords[0] - constants::BLOCK_WIDTH / 2.0 - constants::BALLRADIUS;
-        let right_border = nearest_block_coords[0] + constants::BLOCK_WIDTH / 2.0 + constants::BALLRADIUS;
-        let bottom_border = nearest_block_coords[1] - constants::BLOCK_HEIGHT/ 2.0 - constants::BALLRADIUS; 
-        let top_border = nearest_block_coords[1] + constants::BLOCK_HEIGHT/ 2.0 + constants::BALLRADIUS; 
+        let left_border = nearest_block_coords[0] - constants::BLOCK_WIDTH / 2.0;
+        let right_border = nearest_block_coords[0] + constants::BLOCK_WIDTH / 2.0;
+
+        // y axis is inverted
+        let bottom_border = nearest_block_coords[1] + constants::BLOCK_HEIGHT/ 2.0; 
+        let top_border = nearest_block_coords[1] - constants::BLOCK_HEIGHT/ 2.0; 
 
         if ball_new_loc[0] < left_border {
             return Collision::NoCollision
@@ -164,10 +170,10 @@ impl BlockGrid {
         if ball_new_loc[0] > right_border {
             return Collision::NoCollision
         }
-        if ball_new_loc[1] < bottom_border {
+        if ball_new_loc[1] > bottom_border {
             return Collision::NoCollision
         }
-        if ball_new_loc[1] > top_border {
+        if ball_new_loc[1] < top_border {
             return Collision::NoCollision
         }
 
@@ -176,43 +182,39 @@ impl BlockGrid {
         let nearest_block = self.block_store.get_mut(&utils::Location {
             x: nearest_block_coords[0],
             y: nearest_block_coords[1],
-        }).unwrap();
+        }).unwrap(); // possible issues here if cannot find block in map
 
         if !nearest_block.active {
             return Collision::NoCollision
         }
         else {
             nearest_block.deactivate();
-        }
 
-        // match nearest_block {
-        //     None => panic!("Error could not find nearest block"),
-        //     Some(&mut Block) => {
-        //         if !Block.active {
-        //             return Collision::NoCollision
-        //         }
-        //         else {
-        //             Block.deactivate()
-        //         }
-        //     }
-        // }
+            // calculate collision here relating to the deactivated block
+            let d_left = (ball_new_loc[0] - left_border) / (constants::BLOCK_WIDTH / constants::BLOCK_HEIGHT);
+            let d_right = (right_border - ball_new_loc[0]) / (constants::BLOCK_WIDTH / constants::BLOCK_HEIGHT);
+            let d_top = ball_new_loc[1] - top_border;
+            let d_bottom = bottom_border - ball_new_loc[1];
 
-        // FIXME: Issue with collision reporting - all are no collisions
-        if ball_new_loc[0] > left_border && ball_location[0] < left_border {
-            return Collision::Left
-        }
-        if ball_new_loc[0] < right_border && ball_location[0] > right_border {
-            return Collision::Right
-        }
-        if ball_new_loc[1] > bottom_border && ball_location[1] < bottom_border {
-            return Collision::Bottom
-        }
-        if ball_new_loc[1] < bottom_border && ball_location[1] > bottom_border {
-            return Collision::Top
-        }
-        // Collision::NoCollision
-        panic!("Could not determine collision direction")
+            let distances = [d_left, d_right, d_top, d_bottom];
+            println!("{:?}", distances);  // all should be positive
 
+            let (index_of_min, _) = distances
+                .iter()
+                .enumerate()
+                .min_by(|(_, a), (_, b)| a.total_cmp(b))
+                .unwrap();  // I think I have commited servaral crimes here
+            
+            // FIXME: bottom collisions are not working as expected
+            match index_of_min {
+                0 => Collision::Left,
+                1 => Collision::Right,
+                2 => Collision::Top,
+                3 => Collision::Bottom,
+                _ => Collision::NoCollision,  // should never get here
+            }
+
+        }
     }
 
     fn get_nearest_block_center(&self, ball_location: [f64; 2]) -> [f64; 2] {
@@ -230,5 +232,15 @@ impl BlockGrid {
             self.horizontal_offset + (block_incr_x as f64 + 0.5) * constants::BLOCK_WIDTH,
             self.vertical_offset + (block_incr_y as f64 + 0.5) * constants::BLOCK_HEIGHT,
         ];
+    }
+
+    pub fn draw_nearest_block_center<G: Graphics>(&self, ball: &Ball, g: &mut G, transform: [[f64;3]; 2]) {
+        let center_loc = self.get_nearest_block_center(ball.get_centre());
+        ellipse(
+            [1.0, 1.0, 1.0, 1.0], 
+            [center_loc[0] - 6.0, center_loc[1] - 6.0, 12.0, 12.0], 
+            transform, 
+            g
+        )
     }
 }
