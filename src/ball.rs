@@ -49,6 +49,12 @@ impl Ball {
         self.direction.x += acceleration.x * constants::DT;
         self.direction.y += acceleration.y * constants::DT;
 
+        // possibly clip velocity
+        let speed = self.direction.magnitute();
+        if speed > constants::MAX_BALL_SPEED {
+            self.direction = self.direction.scale(constants::MAX_BALL_SPEED / speed);
+        }
+
         self.position.x = self.position.x + self.direction.x * constants::DT;
         self.position.y = self.position.y + self.direction.y * constants::DT;
 
@@ -85,7 +91,7 @@ impl Ball {
                         }
 
                         // the y coord needs to be negative
-                        self.direction.y = self.direction.y.abs() * -1.0;
+                        self.direction.y = self.direction.y.abs() * -1.0 + constants::PADDLE_VELOCITY_INJECTION;
                         self.direction.x += friction_contribution;
 
                         true

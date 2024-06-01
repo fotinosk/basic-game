@@ -59,9 +59,6 @@ impl Block {
             g,
         )
     }
-    pub fn get_center(&self) -> [f64; 2] {
-        return [self.position.x, self.position.y];
-    }
     pub fn deactivate(&mut self) {
         self.active = false;
     }

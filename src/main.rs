@@ -20,11 +20,6 @@ fn main() {
     // initialize forces here
     let forces: Vec<Box<dyn Force>> = vec![
         Box::new(force_fields::Gravity::new()),
-        // Box::new(force_fields::ElectricField::new(
-        //     constants::WIDTH / 2.0,
-        //     constants::HEIGHT / 2.0,
-        //     true 
-        // )),
     ];
     let mut block_forces = block_grid.get_forces();
 
