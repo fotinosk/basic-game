@@ -50,6 +50,7 @@ impl Ball {
        self.direction 
     }
     pub fn step(&mut self, paddle: &Paddle, acceleration: utils::Location, collision: block::Collision) -> bool {
+        
         self.direction.x += acceleration.x * constants::DT;
         self.direction.y += acceleration.y * constants::DT;
 
@@ -74,15 +75,24 @@ impl Ball {
                 true
             }
             block::Collision::NoCollision => {
-                // TODO: introduce some friction between paddle and ball allowing the paddle to aim
-                // the ball in some way. The paddle can slightly change the x-direction of the ball
                 let bounce = self.check_bounce(&paddle);
 
                 match bounce {
                     BounceObj::NoBounce => true,
                     BounceObj::Paddle => {
+                        // paddle friction - allows the paddle to somewhat control the ball
+                        // trajectory
+                        let friction_contribution: f64;
+                        match paddle.move_direction {
+                            utils::Direction::Left => friction_contribution = -1.0 * constants::PADDLE_FRICTION_COMPONENT,
+                            utils::Direction::Right => friction_contribution = constants::PADDLE_FRICTION_COMPONENT,
+                            utils::Direction::Stationary => friction_contribution = 0.0,
+                        }
+
                         // the y coord needs to be negative
                         self.direction.y = self.direction.y.abs() * -1.0;
+                        self.direction.x += friction_contribution;
+
                         true
                     }
                     BounceObj::TopWall => {

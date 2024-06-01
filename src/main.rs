@@ -95,9 +95,6 @@ fn main() {
 
                     // Detect ball-block colision here
                     let block_collision = block_grid.step(&ball, graphics, context.transform);
-                    if !matches!(block_collision, block::Collision::NoCollision) {
-                        println!("{:?}", block_collision);
-                    }
                     let inplay = ball.step(&paddle, accel, block_collision);
                     if !inplay {
                         state = utils::GameState::GameOver
