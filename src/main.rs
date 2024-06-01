@@ -118,7 +118,49 @@ fn main() {
                         graphics,
                     );
                 }
-                _ => {}
+                utils::GameState::NotStarted => {
+                    // Instructions screen
+                    let _ = text(
+                        constants::LETTER_COLOR,
+                        32,
+                        "Hello! Press <Space> to start or <Q> to quit",
+                        &mut glyphs,
+                        context
+                            .transform
+                            .trans(constants::WIDTH / 2.0 - 350.0, constants::HEIGHT / 2.0),
+                        graphics,
+                    );
+                    let _ = text(
+                        constants::LETTER_COLOR,
+                        28,
+                        "Gravity and Magnetism are active in this game",
+                        &mut glyphs,
+                        context
+                            .transform
+                            .trans(constants::WIDTH / 2.0 - 330.0, constants::HEIGHT / 2.0 + 60.0),
+                        graphics,
+                    );
+                    let _ = text(
+                        constants::LETTER_COLOR,
+                        28,
+                        "Paddle and Side-walls are bouncy, injecting speed",
+                        &mut glyphs,
+                        context
+                            .transform
+                            .trans(constants::WIDTH / 2.0 - 355.0, constants::HEIGHT / 2.0 + 100.0),
+                        graphics,
+                    );
+                    let _ = text(
+                        constants::LETTER_COLOR,
+                        28,
+                        "There is friction between the paddle and the ball",
+                        &mut glyphs,
+                        context
+                            .transform
+                            .trans(constants::WIDTH / 2.0 - 350.0, constants::HEIGHT / 2.0 + 140.0),
+                        graphics,
+                    );
+                }
             }
 
             glyphs.factory.encoder.flush(device);

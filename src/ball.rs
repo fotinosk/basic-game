@@ -91,7 +91,7 @@ impl Ball {
                         }
 
                         // the y coord needs to be negative
-                        self.direction.y = self.direction.y.abs() * -1.0 + constants::PADDLE_VELOCITY_INJECTION;
+                        self.direction.y = self.direction.y.abs() * -1.0 - constants::PADDLE_VELOCITY_INJECTION;
                         self.direction.x += friction_contribution;
 
                         true
@@ -101,11 +101,11 @@ impl Ball {
                         true
                     }
                     BounceObj::LeftWall => {
-                        self.direction.x = self.direction.x.abs();
+                        self.direction.x = self.direction.x.abs() + constants::PADDLE_VELOCITY_INJECTION;
                         true
                     }
                     BounceObj::RightWall => {
-                        self.direction.x = self.direction.x.abs() * -1.0;
+                        self.direction.x = self.direction.x.abs() * -1.0 - constants::PADDLE_VELOCITY_INJECTION;
                         true
                     }
                     BounceObj::BottomWall => {
