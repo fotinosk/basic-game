@@ -154,7 +154,8 @@ impl BlockGrid {
         let nearest_block_coords = self.get_nearest_block_center(ball_location);
 
         let ball_direction = ball.get_direction();
-        let ball_new_loc = [ball_location[0] + ball_direction.x * constants::DT, ball_location[1] + ball_direction.y * constants::DT];
+        // let ball_new_loc = [ball_location[0] + ball_direction.x * constants::DT, ball_location[1] + ball_direction.y * constants::DT];
+        let ball_new_loc = ball_location;
 
         let left_border = nearest_block_coords[0] - constants::BLOCK_WIDTH / 2.0;
         let right_border = nearest_block_coords[0] + constants::BLOCK_WIDTH / 2.0;
